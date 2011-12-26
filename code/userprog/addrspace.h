@@ -15,6 +15,7 @@
 
 #include "copyright.h"
 #include "filesys.h"
+#include "bitmap.h"
 
 #define UserStackSize		1024 	// increase this as necessary!
 
@@ -41,12 +42,13 @@ class AddrSpace {
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
-					// for now!
+					                // for now!
     unsigned int numPages;		// Number of pages in the virtual 
-					// address space
+					            // address space
 
     void InitRegisters();		// Initialize user-level CPU registers,
-					// before jumping to user code
+					            // before jumping to user code
+	Bitmap *b;				            
 
 };
 

@@ -12,24 +12,19 @@
 #define __USERPROG_KSYSCALL_H__ 
 
 #include "kernel.h"
+//#include "synchconsole.h"
 
 
 
-
-void SysHalt()
-{
-  kernel->interrupt->Halt();
-}
+void SysHalt();
 
 
-int SysAdd(int op1, int op2)
-{
-  return op1 + op2;
-}
-
-
-
-
-
+int SysAdd(int op1, int op2);
+//=======
+int SysOSSub(int op1, int op2);
+int SysOSMul(int op1, int op2);
+int SysOSDiv(int op1, int op2);
+int SysPrint(int input, int length);
+int OSPrint(int input,int length);
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

@@ -50,6 +50,9 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "coff.h"
 #include "noff.h"
@@ -123,7 +126,6 @@ SwapHeader (NoffHeader *noffH)
 
 #define ReadStruct(f,s) 	Read(f,(char *)&s,sizeof(s))
 
-extern char *malloc();
 char *noffFileName = NULL;
 
 /* read and check for error */
@@ -146,7 +148,7 @@ void Write(int fd, char *buf, int nBytes)
     }
 }
 
-main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     int fdIn, fdOut, numsections, i, inNoffFile;
     struct filehdr fileh;
@@ -224,8 +226,8 @@ main (int argc, char **argv)
     printf("Loading %d sections:\n", numsections);
     for (i = 0; i < numsections; i++) {
 	printf("\t\"%s\", filepos 0x%x, mempos 0x%x, size 0x%x\n",
-	      sections[i].s_name, sections[i].s_scnptr,
-	      sections[i].s_paddr, sections[i].s_size);
+	      sections[i].s_name, (unsigned int)sections[i].s_scnptr,
+	      (unsigned int)sections[i].s_paddr, (unsigned int)sections[i].s_size);
 	if (sections[i].s_size == 0) {
 		/* do nothing! */	
 	} else if (!strcmp(sections[i].s_name, ".text")) {

@@ -105,6 +105,14 @@ class Thread {
     void Print() { cout << name; }
     void SelfTest();		// test whether thread impl is working
 
+    int timeslice;
+    int GetPriority();
+    int GetRemainingExecutionTicks();
+    void SetPriority(int);
+    void SetRemainingExecutionTicks(int);
+    void MyScheduling(char* c);
+
+
   private:
     // some of the private data for this class is listed above
     
@@ -123,12 +131,22 @@ class Thread {
 // while executing kernel code.
 
     int userRegisters[NumTotalRegs];	// user-level CPU register state
+    
+//------------    
+    int priority;
+    int RemainingExecutionTicks;
 
   public:
     void SaveUserState();		// save user-level register state
     void RestoreUserState();		// restore user-level register state
 
     AddrSpace *space;			// User code this thread is running.
+    
+//-------------set/getPriority    
+    /*void SetPriority(int p);
+    int GetPriority();
+    void SetRemainingExecutionTicks(int);
+    int GetRemainingExecutionTicks();*/
 };
 
 // external function, dummy routine whose sole job is to call Thread::Print

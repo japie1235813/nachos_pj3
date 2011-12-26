@@ -106,21 +106,31 @@ AS = $(GCCDIR)as
 LD = $(GCCDIR)ld
 
 INCDIR =-I../userprog -I../lib
-CFLAGS = -G 0 -c $(INCDIR)
+CFLAGS = -G 0 -c $(INCDIR) -B../../../usr/local/nachos/lib/gcc-lib/decstation-ultrix/2.95.2/ -B../../../usr/local/nachos/decstation-ultrix/bin/
 
 ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments
+PROGRAMS = add halt shell matmult sort segments test
 endif
 
 all: $(PROGRAMS)
 
-start.o: start.s ../userprog/syscall.h
-	$(CPP) $(CPPFLAGS) start.s > strt.s
-	$(AS) $(ASFLAGS) -o start.o strt.s
-	rm strt.s
+start.o: start.S ../userprog/syscall.h
+	$(CC) $(CFLAGS) $(ASFLAGS) -c start.S
+
+test.o: test.c
+	$(CC) $(CFLAGS) -c test.c
+test:test.o start.o
+	$(LD) $(LDFLAGS) start.o test.o -o test.coff
+	$(COFF2NOFF) test.coff test
+
+a.o: a.c
+	$(CC) $(CFLAGS) -c a.c
+a:a.o start.o
+	$(LD) $(LDFLAGS) start.o a.o -o a.coff
+	$(COFF2NOFF) a.coff a
 
 halt.o: halt.c
 	$(CC) $(CFLAGS) -c halt.c

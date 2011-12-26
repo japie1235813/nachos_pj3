@@ -12,10 +12,24 @@
 #include "copyright.h"
 #include "list.h"
 #include "thread.h"
+#include "callback.h"
 
 // The following class defines the scheduler/dispatcher abstraction -- 
 // the data structures and operations needed to keep track of which 
 // thread is running, and which threads are ready but not running.
+
+class 
+SchedulerRoundRobin:public CallBackObj{
+    public:
+        SchedulerRoundRobin();
+        void SetInterrupt();
+        void CallBack();          //.....|||
+        void StartTimer();
+        int timeslice;
+        int next;    
+};
+
+
 
 class Scheduler {
   public:
@@ -34,9 +48,19 @@ class Scheduler {
     
     // SelfTest for scheduler is implemented in class Thread
     
+    //
+    //void SetInterrupt();
+    void SetTimeslice(int);
+    SchedulerRoundRobin* srr;
+    void StartTimer();
+    
   private:
+    #ifdef SCHE_RR
+	SortedList<Thread *> *readyList;
+    #else
     List<Thread *> *readyList;  // queue of threads that are ready to run,
 				// but not running
+    #endif
     Thread *toBeDestroyed;	// finishing thread to be destroyed
     				// by the next thread that runs
 };

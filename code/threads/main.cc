@@ -172,6 +172,7 @@ main(int argc, char **argv)
     bool threadTestFlag = false;
     bool consoleTestFlag = false;
     bool networkTestFlag = false;
+    char *ParameterFile = NULL;
 #ifndef FILESYS_STUB
     char *copyUnixFileName = NULL;    // UNIX file to be copied into Nachos
     char *copyNachosFileName = NULL;  // name of copied file in Nachos
@@ -185,7 +186,7 @@ main(int argc, char **argv)
     // those that set kernel parameters are handled in
     // the Kernel constructor
     for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-d") == 0) {
+    if (strcmp(argv[i], "-d") == 0) {
 	    ASSERT(i + 1 < argc);   // next argument is debug string
             debugArg = argv[i + 1];
 	    i++;
@@ -199,6 +200,7 @@ main(int argc, char **argv)
 	    i++;
 	}
 	else if (strcmp(argv[i], "-K") == 0) {
+        cerr<<"i= "<<i<<endl;	    
 	    threadTestFlag = TRUE;
 	}
 	else if (strcmp(argv[i], "-C") == 0) {
@@ -207,6 +209,11 @@ main(int argc, char **argv)
 	else if (strcmp(argv[i], "-N") == 0) {
 	    networkTestFlag = TRUE;
 	}
+	//make nachos support "-S" parameter
+	else if(strcmp(argv[i],"-S")==0){
+        ParameterFile = argv[i+1];                  
+	}
+	
 #ifndef FILESYS_STUB
 	else if (strcmp(argv[i], "-cp") == 0) {
 	    ASSERT(i + 2 < argc);
@@ -242,7 +249,7 @@ main(int argc, char **argv)
 #endif //FILESYS_STUB
 	}
 
-    }
+    }//for(i)end
     debug = new Debug(debugArg);
     
     DEBUG(dbgThread, "Entering main");
@@ -264,7 +271,11 @@ main(int argc, char **argv)
     if (networkTestFlag) {
       kernel->NetworkTest();   // two-machine test of the network
     }
-
+    
+    if(ParameterFile!=NULL){
+        kernel->currentThread->MyScheduling(ParameterFile);	    
+    }
+    
 #ifndef FILESYS_STUB
     if (removeFileName != NULL) {
       kernel->fileSystem->Remove(removeFileName);
@@ -281,6 +292,7 @@ main(int argc, char **argv)
     if (printFileName != NULL) {
       Print(printFileName);
     }
+
 #endif // FILESYS_STUB
 
     // finally, run an initial user program if requested to do so
@@ -288,8 +300,8 @@ main(int argc, char **argv)
       AddrSpace *space = new AddrSpace;
       ASSERT(space != (AddrSpace *)NULL);
       if (space->Load(userProgName)) {  // load the program into the space
-	space->Execute();              // run the program
-	ASSERTNOTREACHED();            // Execute never returns
+	  space->Execute();              // run the program
+	  ASSERTNOTREACHED();            // Execute never returns
       }
     }
 

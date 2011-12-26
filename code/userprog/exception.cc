@@ -25,6 +25,8 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+//#include "ksyscall.cpp"
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -65,12 +67,99 @@ ExceptionHandler(ExceptionType which)
 
 	ASSERTNOTREACHED();
 	break;
+      case SC_OSSub:
+	DEBUG(dbgSys, "Sub: " << kernel->machine->ReadRegister(4) << " - " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysOSSub Systemcall*/
+	int result;
+	result = SysOSSub(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
 
+
+
+	DEBUG(dbgSys, "Sub returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
+	return;
+	ASSERTNOTREACHED();
+
+	break;
+//========
+      case SC_OSMul:
+	DEBUG(dbgSys, "Mul; " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysOSMul Systemcall*/
+	result = SysOSMul(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Mul returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+	
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
+
+	return;
+	ASSERTNOTREACHED();
+
+	break;
+
+//========
+      case SC_OSDiv:
+	DEBUG(dbgSys, "Div; " << kernel->machine->ReadRegister(4) << " / " << kernel->machine->ReadRegister(5) << "\n");
+	/* Process SysOSMul Systemcall*/
+	result = SysOSDiv(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Div returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, result);
+	
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
+
+	return;
+	ASSERTNOTREACHED();
+
+	break;
+
+
+//========
+      case SC_OSAdd:
       case SC_Add:
 	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 	
 	/* Process SysAdd Systemcall*/
-	int result;
 	result = SysAdd(/* int op1 */(int)kernel->machine->ReadRegister(4),
 			/* int op2 */(int)kernel->machine->ReadRegister(5));
 
@@ -94,6 +183,58 @@ ExceptionHandler(ExceptionType which)
 	
 	ASSERTNOTREACHED();
 
+	break;
+//========
+      case SC_OSPrint:
+	DEBUG(dbgSys, "Print " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysPrint Systemcall*/
+	result = SysPrint(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Print returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+	
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
+	return;
+     case SC_OSPrint2:
+	DEBUG(dbgSys, "Print " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysPrint Systemcall*/
+	result = OSPrint(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Print returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+	
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
+	return;
+	
+     
+	
+	ASSERTNOTREACHED();
 	break;
 
       default:

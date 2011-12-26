@@ -23,6 +23,68 @@
 #include "scheduler.h"
 #include "main.h"
 
+#define SCHE_RR
+
+SchedulerRoundRobin::SchedulerRoundRobin(){
+    //SetInterrupt();
+    timeslice=100;
+    //CallBack();
+}
+
+//----------------------------------------------------------------------
+// setInterrupt
+//
+//----------------------------------------------------------------------
+
+void
+SchedulerRoundRobin::SetInterrupt(){
+    //cerr<<kernel->currentThread->timeslice<<endl;
+    kernel->interrupt->Schedule(this,timeslice,TimerInt);
+    //next = kernel->stats->totalTicks + timeslice;
+    
+}
+
+//----------------------------------------------------------------------
+// callBack
+// 
+//----------------------------------------------------------------------
+
+void
+SchedulerRoundRobin::CallBack(){
+
+    //if (next != kernel->stats->totalTicks) {
+    // return;
+    //}
+
+    Interrupt *interrupt = kernel->interrupt;
+    MachineStatus status = interrupt->getStatus();
+    
+    if (status != IdleMode) {
+	interrupt->YieldOnReturn();
+    }		
+    SetInterrupt();
+}
+
+void
+SchedulerRoundRobin::StartTimer()
+{
+    kernel->interrupt->Schedule(this,timeslice,TimerInt);
+    //next = kernel->stats->totalTicks + timeslice;
+}
+
+//----------------------------------------------------------------------
+// SortedCompare
+
+//----------------------------------------------------------------------
+
+static int 
+SortedCompare(Thread* a,Thread* b){
+    
+    return a->GetPriority()-b->GetPriority();
+}
+
+
+
 //----------------------------------------------------------------------
 // Scheduler::Scheduler
 // 	Initialize the list of ready but not running threads.
@@ -31,7 +93,14 @@
 
 Scheduler::Scheduler()
 { 
-    readyList = new List<Thread *>; 
+    #ifdef SCHE_RR
+    readyList = new SortedList<Thread *>(SortedCompare);
+    srr=new SchedulerRoundRobin();
+       
+    //srr.SetTimeslice();    
+    #else
+    readyList = new List<Thread *>;
+    #endif  
     toBeDestroyed = NULL;
 } 
 
@@ -77,7 +146,7 @@ Scheduler::FindNextToRun ()
     ASSERT(kernel->interrupt->getLevel() == IntOff);
 
     if (readyList->IsEmpty()) {
-	return NULL;
+	    return NULL;
     } else {
     	return readyList->RemoveFront();
     }
@@ -114,7 +183,7 @@ Scheduler::Run (Thread *nextThread, bool finishing)
     
     if (oldThread->space != NULL) {	// if this thread is a user program,
         oldThread->SaveUserState(); 	// save the user's CPU registers
-	oldThread->space->SaveState();
+	    oldThread->space->SaveState();
     }
     
     oldThread->CheckOverflow();		    // check if the old thread
@@ -144,7 +213,8 @@ Scheduler::Run (Thread *nextThread, bool finishing)
 					// and needs to be cleaned up
     
     if (oldThread->space != NULL) {	    // if there is an address space
-        oldThread->RestoreUserState();     // to restore, do it.
+        oldThread->RestoreUserState();     // to restore, do it.\
+				          把剛剛存起來的state放回register裡面去
 	oldThread->space->RestoreState();
     }
 }
@@ -176,4 +246,22 @@ Scheduler::Print()
 {
     cout << "Ready list contents:\n";
     readyList->Apply(ThreadPrint);
+}
+
+//----------------------------------------------------------------------
+// SchedulerRoundRobin::SetTimeslice
+//----------------------------------------------------------------------
+void
+Scheduler::SetTimeslice(int t)
+{     
+     srr->timeslice = t;
+}
+
+//----------------------------------------------------------------------
+// SchedulerRoundRobin::SetTimeslice
+//----------------------------------------------------------------------
+void
+Scheduler::StartTimer()
+{     
+    srr->StartTimer();   
 }

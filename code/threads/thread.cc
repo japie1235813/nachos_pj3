@@ -21,6 +21,10 @@
 #include "switch.h"
 #include "synch.h"
 #include "sysdep.h"
+#include "iostream"
+#include "fstream"
+#include "vector"
+using namespace std;
 
 // this is put at the top of the execution stack, for detecting stack overflows
 const int STACK_FENCEPOST = 0xdedbeef;
@@ -45,6 +49,7 @@ Thread::Thread(char* threadName)
 					// of machine registers
     }
     space = NULL;
+    priority = 256;
 }
 
 //----------------------------------------------------------------------
@@ -97,7 +102,8 @@ Thread::Fork(VoidFunctionPtr func, void *arg)
     
     DEBUG(dbgThread, "Forking thread: " << name << " f(a): " << (int) func << " " << arg);
     
-    StackAllocate(func, arg);
+    //**allocate stack??
+    StackAllocate(func, arg); 
 
     oldLevel = interrupt->SetLevel(IntOff);
     scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
@@ -175,6 +181,7 @@ Thread::Finish ()
     ASSERT(this == kernel->currentThread);
     
     DEBUG(dbgThread, "Finishing thread: " << name);
+    kernel->scheduler->StartTimer();
     
     Sleep(TRUE);				// invokes SWITCH
     // not reached
@@ -208,9 +215,10 @@ Thread::Yield ()
     
     DEBUG(dbgThread, "Yielding thread: " << name);
     
+    kernel->scheduler->ReadyToRun(this);
     nextThread = kernel->scheduler->FindNextToRun();
     if (nextThread != NULL) {
-	kernel->scheduler->ReadyToRun(this);
+
 	kernel->scheduler->Run(nextThread, FALSE);
     }
     (void) kernel->interrupt->SetLevel(oldLevel);
@@ -250,6 +258,9 @@ Thread::Sleep (bool finishing)
     while ((nextThread = kernel->scheduler->FindNextToRun()) == NULL)
 	kernel->interrupt->Idle();	// no one to run, wait for an interrupt
     
+    
+    //thread結束後重新啟動timeslice
+    kernel->scheduler->StartTimer();
     // returns when it's time for us to run
     kernel->scheduler->Run(nextThread, finishing); 
 }
@@ -406,14 +417,28 @@ Thread::RestoreUserState()
 //----------------------------------------------------------------------
 
 static void
-SimpleThread(int which)
+SimpleThread(int which)  //which??
 {
-    int num;
-    
+    /*int num;    
     for (num = 0; num < 5; num++) {
 	cout << "*** thread " << which << " looped " << num << " times\n";
         kernel->currentThread->Yield();
-    }
+    }*/
+
+    while(kernel->currentThread->GetRemainingExecutionTicks()>0) {
+    //<1. Output current thread name and it’s remaining execution ticks         \
+    e.g. Name  RemainingExecutionTicks                                          \
+    <2. Decrease the remaining execution ticks of the calling thread by one     \
+    e.g. currentThread->RemainingExecutionTicks -- ;                            \
+    <3. Invoke kernel->interrupt->OneTick()  
+    cout << kernel->currentThread->getName()<<" "<<kernel->currentThread->GetRemainingExecutionTicks()<<endl;
+    kernel->currentThread->SetRemainingExecutionTicks(kernel->currentThread->GetRemainingExecutionTicks()-1);
+    kernel->interrupt->OneTick();  
+    //kernel->currentThread->Yield(); //doesn't  need??
+    } 
+    
+       
+    
 }
 
 //----------------------------------------------------------------------
@@ -432,5 +457,106 @@ Thread::SelfTest()
     t->Fork((VoidFunctionPtr) SimpleThread, (void *) 1);
     kernel->currentThread->Yield();
     SimpleThread(0);
+}
+
+//-----------------------------------------------------------------------
+//  Thread::Set/GEt Priority
+//  
+//-----------------------------------------------------------------------
+
+void
+Thread::SetPriority(int p)
+{
+    priority = p;
+}
+
+
+int 
+Thread::GetPriority()
+{
+    return priority;
+}
+
+
+//-----------------------------------------------------------------------
+//  Thread::Set/Get RemainingExecutionTime
+//
+//-----------------------------------------------------------------------
+
+
+void Thread::SetRemainingExecutionTicks(int remaintick){
+    RemainingExecutionTicks = remaintick;
+}
+
+int Thread::GetRemainingExecutionTicks(){
+    return RemainingExecutionTicks;
+}
+
+
+
+
+//-----------------------------------------------------------------------
+//  Thread::MyScheduling
+//
+//-----------------------------------------------------------------------
+
+void 
+Thread::MyScheduling(char* ParameterFile){
+    //read txt and parse \
+    <Parse the parameter file to  \
+    put thread’s name, remaining execution ticks, and priority to ThreadName[],  \
+    ThreadRemainingExecutionTicks[], and ThreadPriorityp[], respectively.>       \
+    …
+
+    ifstream parafile;
+    parafile.open(ParameterFile);
+    vector<string> cin;
+    string s,name,pri,tick;
+    int numThreads=0;
+    char** ThreadName;
+    int* ThreadPriority;
+    int* ThreadRemainingExecutionTime;
+    
+    if(!parafile.is_open()){
+        cerr<<ParameterFile<<"does not exist!!"<<endl;
+    }
+    else{
+        parafile >> timeslice ;
+        parafile >> numThreads;
+        
+        ThreadPriority = new int[numThreads];
+        ThreadRemainingExecutionTime = new int[numThreads];
+        ThreadName = new char*[numThreads];
+        for (int i = 0; i < numThreads; ++i) {
+            ThreadName[i] = new char[BUFSIZ];
+        }
+
+        kernel->scheduler->SetTimeslice(timeslice);
+        
+        //TODO: number more than a char...||
+        //cerr<<"timeslice= "<<timeslice<<endl;
+        //cerr<<numThreads<<endl;;
+        for(int i=0;i<numThreads;i++){
+        parafile >> ThreadName[i] >> ThreadPriority[i] >> ThreadRemainingExecutionTime[i];
+        //cerr<<ThreadName[i] << ThreadPriority[i] << ThreadRemainingExecutionTime[i] << endl;
+        /*strcpy(ThreadName[i],cin[i+2].substr(0,1).c_str());
+            //sprintf(ThreadName[i],"%s",cin[i+2].substr(0,1).c_str()); 
+            //<===segfault
+            ThreadPriority[i] = atoi(cin[i+2].substr(2,1).c_str());
+            ThreadRemainingExecutionTime[i] = atoi(cin[i+2].substr(4,1).c_str());*/
+        }
+        
+        
+        Thread *t;
+        for(int i=0;i<numThreads;i++){
+            t = new Thread(ThreadName[i]); 
+            t->SetPriority(ThreadPriority[i]);
+            t->SetRemainingExecutionTicks(ThreadRemainingExecutionTime[i]); 
+            t->Fork((VoidFunctionPtr)SimpleThread, (void *)i);  //i:第i個
+        }
+        //最一開始就要啟動timer,否則會等第一個thread跑完才開始RR
+        kernel->scheduler->StartTimer();
+        kernel->currentThread->Yield(); //* Give up CPU    */
+    }    
 }
 

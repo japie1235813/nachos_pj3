@@ -28,10 +28,10 @@
 include Makefile.dep
 
 CC=gcc
-CFLAGS= $(HOSTCFLAGS) -DRDATA
-LD=gcc
+CFLAGS= $(HOSTCFLAGS) -DRDATA -m32
+LD=gcc -m32
 RM = /bin/rm
-MV = /usr/bin/mv
+MV = /bin/mv
 
 ifeq ($(hosttype),unknown)
 buildtargets = unknownhost

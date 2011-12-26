@@ -37,6 +37,15 @@
 
 #define SC_Add		42
 
+#define SC_OSAdd	23	
+#define SC_OSSub	24
+#define SC_OSDiv	25
+#define SC_OSMul	26
+#define SC_OSPrint	27
+#define SC_OSPrint2	28
+
+
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -49,6 +58,15 @@
  * from the system call entry point in exception.cc.
  */
 
+//==============
+int OSAdd(int op1,int op2);
+int OSSub(int op1,int op2);
+int OSDiv(int op1,int op2);
+int OSMul(int op1,int op2);
+int Print(char* input, int length);
+int OSPrint(char* input, int length);
+
+//==============
 /* Stop Nachos, and print out performance stats */
 void Halt();		
  
