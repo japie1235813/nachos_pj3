@@ -96,10 +96,10 @@ OpenFile::Write(char *into, int numBytes)
 //	boundary; however the disk only knows how to read/write a whole disk
 //	sector at a time.  Thus:
 //
-//	For ReadAt:
+//	For ReadAt:讀進來複製到into的地方
 //	   We read in all of the full or partial sectors that are part of the
 //	   request, but we only copy the part we are interested in.
-//	For WriteAt:
+//	For WriteAt:從from的地方寫回
 //	   We must first read in any sectors that will be partially written,
 //	   so that we don't overwrite the unmodified portion.  We then copy
 //	   in the data that will be modified, and write back all the full
@@ -111,6 +111,7 @@ OpenFile::Write(char *into, int numBytes)
 //	"position" -- the offset within the file of the first byte to be
 //			read/written
 //----------------------------------------------------------------------
+//將Read進來的file 儲存的buffer內容複製到memory中
 
 int
 OpenFile::ReadAt(char *into, int numBytes, int position)

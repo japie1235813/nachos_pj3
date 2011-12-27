@@ -156,8 +156,8 @@ AddrSpace::Load(char *fileName)
 	//b->Mark(start + i);
 	pageTable[i].swapPage = start + i;
 	kernel->swapMap->Mark(start + i);	
-	pageTable[i].valid = TRUE;
-	//pageTable[i].valid = FALSE;
+	//pageTable[i].valid = TRUE;
+	pageTable[i].valid = FALSE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  
@@ -168,15 +168,21 @@ AddrSpace::Load(char *fileName)
 
 // then, copy in the code and data segments into memory
 // Note: this code assumes that virtual address = physical address
+    char** buff =new char*[5];
     if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
         //executable->ReadAt(
 	//	&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
 	//		noffH.code.size, noffH.code.inFileAddr);
-	executable->ReadAt(
-		&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage*PageSize+(noffH.code.virtualAddr%PageSize)]), 
-			noffH.code.size, noffH.code.inFileAddr);
+	
+	//寫到mainmem中//將Read進來的file 儲存的buffer內容複製到memory中
+	//executable->ReadAt(
+	//	&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage*PageSize+(noffH.code.virtualAddr%PageSize)]), 
+	//		noffH.code.size, noffH.code.inFileAddr);
+	
+	// then, copy in the code and data segments into swap, not mem --->先放到mem中建立的buff之後再寫入
+	executable->ReadAt(buff[0],noffH.code.size, noffH.code.inFileAddr);
 	
     }
     if (noffH.initData.size > 0) {
@@ -185,9 +191,10 @@ AddrSpace::Load(char *fileName)
         //executable->ReadAt(
 	//	&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
 	//		noffH.initData.size, noffH.initData.inFileAddr);
-        executable->ReadAt(
-		&(kernel->machine->mainMemory[(pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.initData.virtualAddr % PageSize]),
-			noffH.initData.size, noffH.initData.inFileAddr);
+        //executable->ReadAt(
+	//	&(kernel->machine->mainMemory[(pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.initData.virtualAddr % PageSize]),
+	//		noffH.initData.size, noffH.initData.inFileAddr);
+        executable->ReadAt(buff[1],noffH.initData.size, noffH.initData.inFileAddr);
     }
 
 #ifdef RDATA
