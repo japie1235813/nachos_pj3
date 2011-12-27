@@ -1,9 +1,10 @@
 #include "syscall.h"
 int main(){
     int i;
+    //Print( "Hello, I am b97901084\n", 34 );
     for( i=1;i<30;i++){
         OSPrint("%da000\n",i);
-        /*OSPrint("%da001\n",i);
+        OSPrint("%da001\n",i);
         OSPrint("%da002\n",i);
         OSPrint("%da003\n",i);
         OSPrint("%da004\n",i);
@@ -12,7 +13,7 @@ int main(){
         OSPrint("%da007\n",i);
         OSPrint("%da008\n",i);
         OSPrint("%da009\n",i);
-        OSPrint("%da010\n",i);*/
+        OSPrint("%da010\n",i);
     }
-    Halt();
+    Exit(0);
 }

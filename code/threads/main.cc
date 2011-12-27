@@ -49,7 +49,7 @@
 // global variables
 Kernel *kernel;
 Debug *debug;
-
+Thread *t;
 
 //----------------------------------------------------------------------
 // Cleanup
@@ -163,12 +163,22 @@ Print(char *name)
 //		ex: "nachos -d +" -> argv = {"nachos", "-d", "+"}
 //----------------------------------------------------------------------
 
+void 
+spaceExec(Thread* t){
+        cout<<"lalala"<<endl;
+        t->space->Execute();
+        
+        ASSERTNOTREACHED();            // Execute never returns        
+}
+
 int
 main(int argc, char **argv)
 {
     int i;
     char *debugArg = "";
     char *userProgName = NULL;        // default is not to execute a user prog
+    char **userProgNameTest = new char*;
+    *userProgNameTest =NULL;
     bool threadTestFlag = false;
     bool consoleTestFlag = false;
     bool networkTestFlag = false;
@@ -196,8 +206,13 @@ main(int argc, char **argv)
 	}
 	else if (strcmp(argv[i], "-x") == 0) {
 	    ASSERT(i + 1 < argc);
-	    userProgName = argv[i + 1];
+	    for(int j=0;j<(argc-2);j++){
+	            userProgNameTest[j] = argv[j + 2];
+	            //cout<<userProgNameTest[j]<<endl;
+	    }
 	    i++;
+	    //*userProgNameTest = argv[i + 1];
+	    //i++;
 	}
 	else if (strcmp(argv[i], "-K") == 0) {
         cerr<<"i= "<<i<<endl;	    
@@ -255,9 +270,7 @@ main(int argc, char **argv)
     DEBUG(dbgThread, "Entering main");
 
     kernel = new Kernel(argc, argv);
-
     kernel->Initialize();
-
     CallOnUserAbort(Cleanup);		// if user hits ctl-C
 
     // at this point, the kernel is ready to do something
@@ -296,19 +309,37 @@ main(int argc, char **argv)
 #endif // FILESYS_STUB
 
     // finally, run an initial user program if requested to do so
-    if (userProgName != NULL) {
+    /*if(userProgName != NULL){
       AddrSpace *space = new AddrSpace;
       ASSERT(space != (AddrSpace *)NULL);
       if (space->Load(userProgName)) {  // load the program into the space
 	  space->Execute();              // run the program
 	  ASSERTNOTREACHED();            // Execute never returns
       }
-    }
+    
+    }*/
+    for(int j=0;j<argc-2;j++) {
+      t=new Thread(userProgNameTest[j]);
+      t->space = new AddrSpace;
+      ASSERT(t->space != (AddrSpace *)NULL);
+      
+      if (t->space->Load(userProgNameTest[j])) {  // load the program into the space
+	  //space->Execute();              // run the program
+	  cout<<"Thread"<<j<<": "<<userProgNameTest[j]<<" is running.."<<endl;
+	  t->Fork((VoidFunctionPtr)spaceExec, t);
+	  //kernel->scheduler->ReadyToRun(t);
+      }
+      
+     }
+	  //ASSERTNOTREACHED();            // Execute never returns
 
     // If we don't run a user program, we may get here.
     // Calling "return" would terminate the program.
     // Instead, call Halt, which will first clean up, then
     //  terminate.
+    kernel->scheduler->StartTimer();
+    kernel->currentThread->Yield(); //* Give up CPU    */
+    
     kernel->interrupt->Halt();
     
     ASSERTNOTREACHED();

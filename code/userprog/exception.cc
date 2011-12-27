@@ -60,6 +60,10 @@ ExceptionHandler(ExceptionType which)
     switch (which) {
     case SyscallException:
       switch(type) {
+      case SC_Exit:
+        cout<<"exit"<<endl;
+        kernel->currentThread->Finish();
+        break;
       case SC_Halt:
 	DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 

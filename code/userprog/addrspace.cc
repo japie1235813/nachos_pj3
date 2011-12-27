@@ -21,6 +21,7 @@
 #include "machine.h"
 #include "noff.h"
 
+Bitmap* AddrSpace::b =new Bitmap(NumPhysPages);
 //----------------------------------------------------------------------
 // SwapHeader
 // 	Do little endian to big endian conversion on the bytes in the 
@@ -67,18 +68,10 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
-    pageTable = new TranslationEntry[NumPhysPages];
-    for (int i = 0; i < NumPhysPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  
-    }
+    
     
     // zero out the entire address space
-    bzero(kernel->machine->mainMemory, MemorySize);
+    //bzero(kernel->machine->mainMemory, MemorySize);
 }
 
 //----------------------------------------------------------------------
@@ -88,6 +81,9 @@ AddrSpace::AddrSpace()
 
 AddrSpace::~AddrSpace()
 {
+   for (int i = 0; i < numPages; i++) {
+        b->Clear(pageTable[i].physicalPage);
+   }
    delete pageTable;
 }
 
@@ -142,20 +138,47 @@ AddrSpace::Load(char *fileName)
 
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
+//==================
+    
+    //Ptable *buf = kernel->Pages;
+    
+    pageTable = new TranslationEntry[numPages];
+    for (int i = 0; i < numPages; i++) {    
+	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
+	cout<<" b->FindAndSet()= "<< b->FindAndSet()<<endl;
+	pageTable[i].physicalPage = b->FindAndSet();
+	pageTable[i].valid = TRUE;
+	pageTable[i].use = FALSE;
+	pageTable[i].dirty = FALSE;
+	pageTable[i].readOnly = FALSE;  
+    }
+
+
+
+
+
+
 // then, copy in the code and data segments into memory
 // Note: this code assumes that virtual address = physical address
     if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-        executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
+        //executable->ReadAt(
+	//	&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
+	//		noffH.code.size, noffH.code.inFileAddr);
+	executable->ReadAt(
+		&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage*PageSize+(noffH.code.virtualAddr%PageSize)]), 
 			noffH.code.size, noffH.code.inFileAddr);
+	
     }
     if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
 	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
+        //executable->ReadAt(
+	//	&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
+	//		noffH.initData.size, noffH.initData.inFileAddr);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
+		&(kernel->machine->mainMemory[(pageTable[0].physicalPage * PageSize)+noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);
     }
 
@@ -244,7 +267,11 @@ AddrSpace::InitRegisters()
 //----------------------------------------------------------------------
 
 void AddrSpace::SaveState() 
-{}
+{
+    pageTable = kernel->machine->pageTable ;
+    numPages = kernel->machine->pageTableSize;
+
+}
 
 //----------------------------------------------------------------------
 // AddrSpace::RestoreState

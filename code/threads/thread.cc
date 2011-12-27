@@ -99,10 +99,11 @@ Thread::Fork(VoidFunctionPtr func, void *arg)
     Interrupt *interrupt = kernel->interrupt;
     Scheduler *scheduler = kernel->scheduler;
     IntStatus oldLevel;
-    
+    cout<<"Forking thread: " << name << " f(a): " << (int) func << " " << arg<<endl;
     DEBUG(dbgThread, "Forking thread: " << name << " f(a): " << (int) func << " " << arg);
     
     //**allocate stack??
+    
     StackAllocate(func, arg); 
 
     oldLevel = interrupt->SetLevel(IntOff);
