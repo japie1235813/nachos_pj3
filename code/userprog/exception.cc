@@ -248,7 +248,8 @@ ExceptionHandler(ExceptionType which)
       break;
     case PageFaultException:
       cout<<"PageFaultHandler();"<<endl;       
-      
+      ++kernel->stats->numPageFaults;
+      kernel->currentThread->space->PageFaultHandler();
       //kernel->swap->ReadAt(,,);      
       return;
       //break;

@@ -208,7 +208,8 @@ AddrSpace::Load(char *fileName)
 #endif
 
     //寫到swap中
-    kernel->swap->WriteAt(  ,noffH.initData.size, noffH.initData.inFileAddr);
+    kernel->swap->WriteAt(buff[0], noffH.code.size, noffH.code.inFileAddr);
+    kernel->swap->WriteAt(buff[1], noffH.initData.size, noffH.initData.inFileAddr);
 
     delete executable;			// close file
     return TRUE;			// success
@@ -357,5 +358,17 @@ AddrSpace::Translate(unsigned int vaddr, unsigned int *paddr, int isReadWrite)
 }
 
 
+//----------------------------------------------------------------------
+// AddrSpace::PageFaultHandle
 
+
+
+
+//----------------------------------------------------------------------
+
+void
+AddrSpace::PageFaultHandler(){
+        cout<<"AddrSpace::PageFaultHandler()"<<endl;
+
+}
 
