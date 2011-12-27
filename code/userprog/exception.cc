@@ -57,6 +57,7 @@ ExceptionHandler(ExceptionType which)
 
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
+    cout<<"which= "<<which<<endl;
     switch (which) {
     case SyscallException:
       switch(type) {
@@ -235,20 +236,26 @@ ExceptionHandler(ExceptionType which)
 	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
 	}
 	return;
-	
-     
-	
-	ASSERTNOTREACHED();
-	break;
-
+      //case SC_Exec:  
+        //cout<<"SC_Exit --whenPagefault?"<<endl;
+	//break;
+	//ASSERTNOTREACHED();
+	//break;
       default:
 	cerr << "Unexpected system call " << type << "\n";
 	break;
       }
       break;
+    case PageFaultException:
+      cout<<"PageFaultHandler();"<<endl;       
+      
+      //kernel->swap->ReadAt(,,);      
+      break;
+      
     default:
       cerr << "Unexpected user mode exception" << (int)which << "\n";
       break;
     }
     ASSERTNOTREACHED();
 }
+

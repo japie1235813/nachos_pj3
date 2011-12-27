@@ -110,9 +110,12 @@ Kernel::Initialize()
     fileSystem = new FileSystem(formatFlag);
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
-    postOfficeOut = new PostOfficeOutput(reliability);
-
-    interrupt->Enable();
+    postOfficeOut = new PostOfficeOutput(reliability);    
+    interrupt->Enable();    
+    
+    swapMap = new Bitmap(128);
+    swap = kernel->fileSystem->Open("DISK_0");
+    
 }
 
 //----------------------------------------------------------------------

@@ -145,18 +145,24 @@ AddrSpace::Load(char *fileName)
     
     
 //==================    
+//load到swap space中
     int start =  b->FindAndSet();
+    //int start =  kernel->swapMap->FindAndSet();
     pageTable = new TranslationEntry[numPages];
     for (int i = 0; i < numPages; i++) {    
 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
 	//cout<<" b->FindAndSet()= "<< b->FindAndSet()<<endl;
 	pageTable[i].physicalPage = start + i;
 	b->Mark(start + i);
+	//pageTable[i].swapPage = start + i;
+	//kernel->swapMap->Mark(start + i);	
 	pageTable[i].valid = TRUE;
+	//pageTable[i].valid = FALSE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  
     }
+
 
 
 

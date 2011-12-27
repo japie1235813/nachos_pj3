@@ -58,6 +58,8 @@ class Kernel {
     PostOfficeOutput *postOfficeOut;
 
     int hostName;               // machine identifier
+    Bitmap* swapMap;
+    OpenFile* swap;
 
   private:
     bool randomSlice;		// enable pseudo-random time slicing
