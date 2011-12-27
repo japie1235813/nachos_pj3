@@ -58,6 +58,7 @@ class Kernel {
     PostOfficeOutput *postOfficeOut;
 
     int hostName;               // machine identifier
+    FileSystem *swapfileSystem;
     Bitmap* swapMap;
     OpenFile* swap;
 

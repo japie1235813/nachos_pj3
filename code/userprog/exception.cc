@@ -250,7 +250,8 @@ ExceptionHandler(ExceptionType which)
       cout<<"PageFaultHandler();"<<endl;       
       
       //kernel->swap->ReadAt(,,);      
-      break;
+      return;
+      //break;
       
     default:
       cerr << "Unexpected user mode exception" << (int)which << "\n";

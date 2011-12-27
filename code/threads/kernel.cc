@@ -113,8 +113,9 @@ Kernel::Initialize()
     postOfficeOut = new PostOfficeOutput(reliability);    
     interrupt->Enable();    
     
+    swapfileSystem = new FileSystem();
     swapMap = new Bitmap(128);
-    swap = kernel->fileSystem->Open("DISK_0");
+    swap = kernel->swapfileSystem->Open("SWAP_0");
     
 }
 

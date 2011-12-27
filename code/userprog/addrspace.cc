@@ -207,6 +207,9 @@ AddrSpace::Load(char *fileName)
     }
 #endif
 
+    //寫到swap中
+    kernel->swap->WriteAt(  ,noffH.initData.size, noffH.initData.inFileAddr);
+
     delete executable;			// close file
     return TRUE;			// success
 }
