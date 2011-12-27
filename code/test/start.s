@@ -41,7 +41,65 @@ __start:
  * 	convention on the MIPS.
  * -------------------------------------------------------------
  */
+//========
 
+	.globl OSAdd
+	.ent	OSAdd
+OSAdd:
+	addiu $2,$0,SC_OSAdd   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end OSAdd
+
+
+
+	.globl OSSub
+	.ent	OSSub
+OSSub:
+	addiu $2,$0,SC_OSSub   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end OSSub
+
+
+	.globl OSMul
+	.ent	OSMul
+OSMul:
+	addiu $2,$0,SC_OSMul   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end OSMul
+
+
+
+	.globl OSDiv
+	.ent	OSDiv
+OSDiv:
+	addiu $2,$0,SC_OSDiv   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end OSDiv
+
+
+	.globl Print
+	.ent	Print
+Print:
+	addiu $2,$0,SC_OSPrint   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end Print
+//實做 int Print(char* input, int length)
+
+	.globl OSPrint
+	.ent	OSPrint
+OSPrint:
+	addiu $2,$0,SC_OSPrint2   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
+	j 	$31
+	.end OSPrint
+
+
+//=========
 	.globl Halt
 	.ent	Halt
 Halt:
@@ -53,8 +111,8 @@ Halt:
 	.globl Add
 	.ent	Add
 Add:
-	addiu $2,$0,SC_Add
-	syscall
+	addiu $2,$0,SC_Add   //put system call number in register 2
+	syscall		     //all parameters of this system call will be stored in register 4,5,6,7 by MIPS machine automatically
 	j 	$31
 	.end Add
 

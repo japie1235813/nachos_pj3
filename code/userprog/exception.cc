@@ -61,7 +61,7 @@ ExceptionHandler(ExceptionType which)
     case SyscallException:
       switch(type) {
       case SC_Exit:
-        cout<<"exit"<<endl;
+        //cout<<"exit"<<endl;
         kernel->currentThread->Finish();
         break;
       case SC_Halt:

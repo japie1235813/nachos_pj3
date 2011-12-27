@@ -48,7 +48,7 @@ Thread::Thread(char* threadName)
 					// new thread ignores contents 
 					// of machine registers
     }
-    space = NULL;
+    space = new AddrSpace;
     priority = 256;
 }
 
@@ -99,7 +99,7 @@ Thread::Fork(VoidFunctionPtr func, void *arg)
     Interrupt *interrupt = kernel->interrupt;
     Scheduler *scheduler = kernel->scheduler;
     IntStatus oldLevel;
-    cout<<"Forking thread: " << name << " f(a): " << (int) func << " " << arg<<endl;
+    //cout<<"Forking thread: " << name << " f(a): " << (int) func << " " << arg<<endl;
     DEBUG(dbgThread, "Forking thread: " << name << " f(a): " << (int) func << " " << arg);
     
     //**allocate stack??
@@ -256,8 +256,13 @@ Thread::Sleep (bool finishing)
     DEBUG(dbgThread, "Sleeping thread: " << name);
 
     status = BLOCKED;
-    while ((nextThread = kernel->scheduler->FindNextToRun()) == NULL)
-	kernel->interrupt->Idle();	// no one to run, wait for an interrupt
+    int prev = kernel->stats->totalTicks;
+    while ((nextThread = kernel->scheduler->FindNextToRun()) == NULL) {
+    if (finishing && kernel->stats->totalTicks - prev > 1000)
+        kernel->interrupt->Halt();
+    else
+    	kernel->interrupt->Idle();	// no one to run, wait for an interrupt
+	}
     
     
     //thread結束後重新啟動timeslice
@@ -320,7 +325,7 @@ Thread::StackAllocate (VoidFunctionPtr func, void *arg)
     stack = (int *) AllocBoundedArray(StackSize * sizeof(int));
 
 #ifdef PARISC
-    // HP stack works from low addresses to high addresses
+    // HP stack works from low \es to high addresses
     // everyone else works the other way: from high addresses to low addresses
     stackTop = stack + 16;	// HP requires 64-byte frame marker
     stack[StackSize - 1] = STACK_FENCEPOST;

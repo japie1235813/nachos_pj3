@@ -14,5 +14,4 @@ for( i=1;i<30;i++){
     OSPrint("%db009\n",i);
     OSPrint("%db010\n",i);
     }
-    Exit(0);
 }

@@ -1,7 +1,7 @@
 #include "syscall.h"
+
 int main(){
     int i;
-    //Print( "Hello, I am b97901084\n", 34 );
     for( i=1;i<30;i++){
         OSPrint("%da000\n",i);
         OSPrint("%da001\n",i);
@@ -15,5 +15,4 @@ int main(){
         OSPrint("%da009\n",i);
         OSPrint("%da010\n",i);
     }
-    Exit(0);
 }

@@ -140,21 +140,23 @@ AddrSpace::Load(char *fileName)
 
 //==================
     
-    //Ptable *buf = kernel->Pages;
+    //Mutex ??
     
+    
+    
+//==================    
+    int start =  b->FindAndSet();
     pageTable = new TranslationEntry[numPages];
     for (int i = 0; i < numPages; i++) {    
 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	cout<<" b->FindAndSet()= "<< b->FindAndSet()<<endl;
-	pageTable[i].physicalPage = b->FindAndSet();
+	//cout<<" b->FindAndSet()= "<< b->FindAndSet()<<endl;
+	pageTable[i].physicalPage = start + i;
+	b->Mark(start + i);
 	pageTable[i].valid = TRUE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  
     }
-
-
-
 
 
 
@@ -178,7 +180,7 @@ AddrSpace::Load(char *fileName)
 	//	&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
 	//		noffH.initData.size, noffH.initData.inFileAddr);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[(pageTable[0].physicalPage * PageSize)+noffH.initData.virtualAddr]),
+		&(kernel->machine->mainMemory[(pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.initData.virtualAddr % PageSize]),
 			noffH.initData.size, noffH.initData.inFileAddr);
     }
 
@@ -186,8 +188,8 @@ AddrSpace::Load(char *fileName)
     if (noffH.readonlyData.size > 0) {
         DEBUG(dbgAddr, "Initializing read only data segment.");
 	DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
-        executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
+    	executable->ReadAt(
+	    &(kernel->machine->mainMemory[(pageTable[noffH.readonlyData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.readonlyData.virtualAddr % PageSize]),
 			noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
     }
 #endif
@@ -208,14 +210,14 @@ AddrSpace::Load(char *fileName)
 void 
 AddrSpace::Execute() 
 {
-
+    //cout<<"AddrSpace::Execute()" <<endl;
     kernel->currentThread->space = this;
 
     this->InitRegisters();		// set the initial register values
     this->RestoreState();		// load page table register
-
+    //cout<<"AddrSpace::Execute()2" <<endl;
     kernel->machine->Run();		// jump to the user progam
-
+   
     ASSERTNOTREACHED();			// machine->Run never returns;
 					// the address space exits
 					// by doing the syscall "exit"

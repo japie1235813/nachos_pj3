@@ -46,16 +46,25 @@ int SysPrint(int input, int length){
 	}
 }
 
-int OSPrint(int input,int length){
-    int a=0,i=2;
-    cout<<length;
+int OSPrint(int input,int num){
+    int a = 0, i = 0;
     
-	do{
+	while (true) {
 	    kernel->machine->ReadMem(input+i,1,&a);
 	//synchConsoleOut->PutChar((char)a);
-	    cout<<(char)a;
-	    i++;
-	}while(a!='\0');
+	    if (a == '%') {
+    	    kernel->machine->ReadMem(input+i+1,1,&a);
+    	    if (a == 'd') {
+    	        cout << num;
+    	        ++i;
+    	    }
+	    } else if (a == 0) {
+	        break;
+	    } else {
+	        cout<<(char)a;
+	    }
+	    ++i;
+	}
 
     //printf(s.c_str(),i);
     //cout<<i<<s<<endl;;

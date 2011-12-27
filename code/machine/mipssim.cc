@@ -57,7 +57,7 @@ void
 Machine::Run()
 {
     Instruction *instr = new Instruction;  // storage for decoded instruction
-
+    
     if (debug->IsEnabled('m')) {
         cout << "Starting program in thread: " << kernel->currentThread->getName();
 	cout << ", at time: " << kernel->stats->totalTicks << "\n";
@@ -128,7 +128,7 @@ Machine::OneInstruction(Instruction *instr)
     int nextLoadReg = 0; 	
     int nextLoadValue = 0; 	// record delayed load operation, to apply
 				// in the future
-
+    //cout<<"OneInstruction(Instruction *instr)"<<endl;
     // Fetch instruction 
     if (!ReadMem(registers[PCReg], 4, &raw))
 	return;			// exception occurred

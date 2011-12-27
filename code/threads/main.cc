@@ -165,9 +165,9 @@ Print(char *name)
 
 void 
 spaceExec(Thread* t){
-        cout<<"lalala"<<endl;
-        t->space->Execute();
-        
+        //cout<<"lalala"<<endl;
+        t->space->Load(t->getName());
+        t->space->Execute();        
         ASSERTNOTREACHED();            // Execute never returns        
 }
 
@@ -176,9 +176,9 @@ main(int argc, char **argv)
 {
     int i;
     char *debugArg = "";
-    char *userProgName = NULL;        // default is not to execute a user prog
-    char **userProgNameTest = new char*;
-    *userProgNameTest =NULL;
+    //char *userProgName = NULL;        // default is not to execute a user prog
+    int numOfUserProgram = 0;
+    char **userProgNameTest = new char*[16];
     bool threadTestFlag = false;
     bool consoleTestFlag = false;
     bool networkTestFlag = false;
@@ -205,17 +205,15 @@ main(int argc, char **argv)
             cout << copyright << "\n";
 	}
 	else if (strcmp(argv[i], "-x") == 0) {
-	    ASSERT(i + 1 < argc);
-	    for(int j=0;j<(argc-2);j++){
-	            userProgNameTest[j] = argv[j + 2];
+	    while (i + 1 < argc && argv[i + 1][0] != '-') {
+	            userProgNameTest[numOfUserProgram++] = argv[++i];
 	            //cout<<userProgNameTest[j]<<endl;
 	    }
-	    i++;
 	    //*userProgNameTest = argv[i + 1];
 	    //i++;
 	}
 	else if (strcmp(argv[i], "-K") == 0) {
-        cerr<<"i= "<<i<<endl;	    
+        //cerr<<"i= "<<i<<endl;	    
 	    threadTestFlag = TRUE;
 	}
 	else if (strcmp(argv[i], "-C") == 0) {
@@ -318,27 +316,26 @@ main(int argc, char **argv)
       }
     
     }*/
-    for(int j=0;j<argc-2;j++) {
+    for(int j=0;j< numOfUserProgram;j++) {
       t=new Thread(userProgNameTest[j]);
-      t->space = new AddrSpace;
       ASSERT(t->space != (AddrSpace *)NULL);
       
-      if (t->space->Load(userProgNameTest[j])) {  // load the program into the space
-	  //space->Execute();              // run the program
-	  cout<<"Thread"<<j<<": "<<userProgNameTest[j]<<" is running.."<<endl;
-	  t->Fork((VoidFunctionPtr)spaceExec, t);
-	  //kernel->scheduler->ReadyToRun(t);
-      }
-      
+      //if (t->space->Load(userProgNameTest[j])) {  // load the program into the space
+      //space->Execute();              // run the program
+      //cout<<"Thread"<<j<<": "<<userProgNameTest[j]<<" is running.."<<endl;
+      t->Fork((VoidFunctionPtr)spaceExec, t);
+      //kernel->scheduler->ReadyToRun(t);
+      //}      
      }
+     //結束main
+     kernel->currentThread->Finish();
+
 	  //ASSERTNOTREACHED();            // Execute never returns
 
     // If we don't run a user program, we may get here.
     // Calling "return" would terminate the program.
     // Instead, call Halt, which will first clean up, then
     //  terminate.
-    kernel->scheduler->StartTimer();
-    kernel->currentThread->Yield(); //* Give up CPU    */
     
     kernel->interrupt->Halt();
     
