@@ -110,6 +110,7 @@ AddrSpace::Load(char *fileName)
 	return FALSE;
     }
 
+     
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
@@ -170,7 +171,7 @@ AddrSpace::Load(char *fileName)
 // then, copy in the code and data segments into memory
 // Note: this code assumes that virtual address = physical address
     //char buff[100];
-    char *buff = new char[1024];
+    char *buff = new char[1000000];
     if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
@@ -373,7 +374,7 @@ AddrSpace::PageFaultHandler(int badAddr){
         //找到mem中可使用的空間 將其值寫到pageTable中設成valid 並將Ins重做一次
         
         //main mem中還有多的空間
-        int vpn = badAddr/PageSize;
+        unsigned int vpn = (unsigned)badAddr/PageSize;
         int finded = b->FindAndSet();
         cout<<"finded= "<<finded<<endl;
         pageTable[vpn].physicalPage = finded;
