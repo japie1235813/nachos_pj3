@@ -125,7 +125,7 @@ OpenFile::ReadAt(char *into, int numBytes, int position)
     if ((position + numBytes) > fileLength)		
 	numBytes = fileLength - position;
     DEBUG(dbgFile, "Reading " << numBytes << " bytes at " << position << " from file of length " << fileLength);
-
+    cout<<"Reading " << numBytes << " bytes at " << position << " from file of length " << fileLength<<endl;
     firstSector = divRoundDown(position, SectorSize);
     lastSector = divRoundDown(position + numBytes - 1, SectorSize);
     numSectors = 1 + lastSector - firstSector;
@@ -155,7 +155,7 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     if ((position + numBytes) > fileLength)
 	numBytes = fileLength - position;
     DEBUG(dbgFile, "Writing " << numBytes << " bytes at " << position << " from file of length " << fileLength);
-
+    cout<< "Writing " << numBytes << " bytes at " << position << " from file of length " << fileLength<<endl;
     firstSector = divRoundDown(position, SectorSize);
     lastSector = divRoundDown(position + numBytes - 1, SectorSize);
     numSectors = 1 + lastSector - firstSector;

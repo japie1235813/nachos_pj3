@@ -252,6 +252,7 @@ ExceptionHandler(ExceptionType which)
       cout<<"PageFaultHandler();"<<endl;       
       ++kernel->stats->numPageFaults;
       int faultAddr = kernel->machine->ReadRegister(BadVAddrReg);
+      cout<<"faultAddr= "<<faultAddr<<endl;
       kernel->currentThread->space->PageFaultHandler(faultAddr);      
       return;
       //break;
