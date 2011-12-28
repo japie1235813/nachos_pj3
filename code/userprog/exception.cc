@@ -55,7 +55,7 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = kernel->machine->ReadRegister(2);
-
+    
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
     cout<<"which= "<<which<<endl;
@@ -248,13 +248,14 @@ ExceptionHandler(ExceptionType which)
       }
       break;
     case PageFaultException:
+    {
       cout<<"PageFaultHandler();"<<endl;       
       ++kernel->stats->numPageFaults;
       int faultAddr = kernel->machine->ReadRegister(BadVAddrReg);
       kernel->currentThread->space->PageFaultHandler(faultAddr);      
       //return;
       break;
-      
+     } 
     default:
       cerr << "Unexpected user mode exception" << (int)which << "\n";
       break;
