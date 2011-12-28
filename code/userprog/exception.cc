@@ -253,8 +253,8 @@ ExceptionHandler(ExceptionType which)
       ++kernel->stats->numPageFaults;
       int faultAddr = kernel->machine->ReadRegister(BadVAddrReg);
       kernel->currentThread->space->PageFaultHandler(faultAddr);      
-      //return;
-      break;
+      return;
+      //break;
      } 
     default:
       cerr << "Unexpected user mode exception" << (int)which << "\n";

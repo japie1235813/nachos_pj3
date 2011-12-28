@@ -367,7 +367,19 @@ AddrSpace::Translate(unsigned int vaddr, unsigned int *paddr, int isReadWrite)
 
 void
 AddrSpace::PageFaultHandler(int badAddr){
-        cout<<"AddrSpace::PageFaultHandler()"<<endl;
+        //cout<<"AddrSpace::PageFaultHandler()"<<endl;
+        //找到mem中可使用的空間 將其值寫到pageTable中設成valid 並將Ins重做一次
+        
+        //main mem中還有多的空間
+        int vpn = badAddr/PageSize;
+        int finded = b->FindAndSet();
+        cout<<"finded"
+        pageTable[vpn].physicalPage = finded;
+        pageTable[vpn].valid = true;        
+        kernel->swapFile->ReadAt(&(kernel->machine->mainMemory[finded]),PageSize,pageTable[vpn].swapPage);
+        
+        //main mem中已沒有多餘空間 -> 趕一個出去  <----暫時不考慮
+        
         
 }
 
