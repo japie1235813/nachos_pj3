@@ -58,7 +58,7 @@ ExceptionHandler(ExceptionType which)
     
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
-    cout<<"which= "<<which<<endl;
+    //cout<<"which= "<<which<<endl;
     switch (which) {
     case SyscallException:
       switch(type) {
@@ -249,10 +249,10 @@ ExceptionHandler(ExceptionType which)
       break;
     case PageFaultException:
     {
-      cout<<"PageFaultHandler();"<<endl;       
+      //cout<<"PageFaultHandler();"<<endl;       
       ++kernel->stats->numPageFaults;
       int faultAddr = kernel->machine->ReadRegister(BadVAddrReg);
-      cout<<"faultAddr= "<<faultAddr<<endl;
+      //cout<<"faultAddr= "<<faultAddr<<endl;
       kernel->currentThread->space->PageFaultHandler(faultAddr);      
       return;
       //break;

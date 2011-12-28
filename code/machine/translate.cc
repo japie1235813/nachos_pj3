@@ -109,6 +109,7 @@ Machine::ReadMem(int addr, int size, int *value)
 	
       case 4:
 	data = *(unsigned int *) &mainMemory[physicalAddress];
+	//cout<<"data= "<<data<<endl;
 	*value = WordToHost(data);
 	break;
 

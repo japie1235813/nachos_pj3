@@ -171,7 +171,7 @@ AddrSpace::Load(char *fileName)
 // then, copy in the code and data segments into memory
 // Note: this code assumes that virtual address = physical address
     //char buff[100];
-    char *buff = new char[1000000];
+    char *buff = new char[size];
     if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
@@ -185,7 +185,7 @@ AddrSpace::Load(char *fileName)
 	//		noffH.code.size, noffH.code.inFileAddr);
 	
 	// then, copy in the code and data segments into swap, not mem --->先放到mem中建立的buff之後再寫入
-	executable->ReadAt(buff,noffH.code.size, noffH.code.inFileAddr);
+	executable->ReadAt(&(buff[noffH.code.virtualAddr]),noffH.code.size, noffH.code.inFileAddr);
 	
     }
 
@@ -198,7 +198,7 @@ AddrSpace::Load(char *fileName)
         //executable->ReadAt(
 	//	&(kernel->machine->mainMemory[(pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.initData.virtualAddr % PageSize]),
 	//		noffH.initData.size, noffH.initData.inFileAddr);
-        executable->ReadAt(buff+noffH.initData.virtualAddr,noffH.initData.size, noffH.initData.inFileAddr);
+        executable->ReadAt(&(buff[noffH.initData.virtualAddr])+noffH.initData.virtualAddr,noffH.initData.size, noffH.initData.inFileAddr);
     }
 
 #ifdef RDATA
@@ -208,13 +208,14 @@ AddrSpace::Load(char *fileName)
     	//executable->ReadAt(
 	//    &(kernel->machine->mainMemory[(pageTable[noffH.readonlyData.virtualAddr/PageSize].physicalPage * PageSize)+noffH.readonlyData.virtualAddr % PageSize]),
 	//		noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
-	executable->ReadAt(buff+noffH.readonlyData.virtualAddr,noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
+	executable->ReadAt(&(buff[noffH.readonlyData.virtualAddr]),noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
     }
 #endif
 
     //寫到swap中    
-    kernel->swapFile->WriteAt(buff, size, start);
+    kernel->swapFile->WriteAt(buff, size, start*PageSize);
 
+    delete []buff;
     delete executable;			// close file
     return TRUE;			// success
 }
@@ -376,10 +377,10 @@ AddrSpace::PageFaultHandler(int badAddr){
         //main mem中還有多的空間
         unsigned int vpn = (unsigned)badAddr/PageSize;
         int finded = b->FindAndSet();
-        cout<<"finded= "<<finded<<endl;
+        //cout<<"finded= "<<finded<<endl;
         pageTable[vpn].physicalPage = finded;
         pageTable[vpn].valid = true;        
-        kernel->swapFile->ReadAt(&(kernel->machine->mainMemory[finded*PageSize]),PageSize,pageTable[vpn].swapPage);
+        kernel->swapFile->ReadAt(&(kernel->machine->mainMemory[finded*PageSize]),PageSize,pageTable[vpn].swapPage*PageSize);
         
         
         //main mem中已沒有多餘空間 -> 趕一個出去  <----暫時不考慮        
