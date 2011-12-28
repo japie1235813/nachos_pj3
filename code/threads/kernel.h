@@ -60,7 +60,7 @@ class Kernel {
     int hostName;               // machine identifier
     FileSystem *swapfileSystem;
     Bitmap* swapMap;
-    OpenFile* swap;
+    OpenFile* swapFile;
 
   private:
     bool randomSlice;		// enable pseudo-random time slicing

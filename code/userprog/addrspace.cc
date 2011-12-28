@@ -154,6 +154,7 @@ AddrSpace::Load(char *fileName)
 	//cout<<" b->FindAndSet()= "<< b->FindAndSet()<<endl;
 	//pageTable[i].physicalPage = start + i;
 	//b->Mark(start + i);
+	pageTable[i].physicalPage = -1;
 	pageTable[i].swapPage = start + i;
 	kernel->swapMap->Mark(start + i);	
 	//pageTable[i].valid = TRUE;
@@ -208,8 +209,8 @@ AddrSpace::Load(char *fileName)
 #endif
 
     //寫到swap中
-    kernel->swap->WriteAt(buff[0], noffH.code.size, noffH.code.inFileAddr);
-    kernel->swap->WriteAt(buff[1], noffH.initData.size, noffH.initData.inFileAddr);
+    kernel->swapFile->WriteAt(buff[0], noffH.code.size, start);
+    kernel->swapFile->WriteAt(buff[1], noffH.initData.size, start + numPages*PageSize);
 
     delete executable;			// close file
     return TRUE;			// success
@@ -362,13 +363,11 @@ AddrSpace::Translate(unsigned int vaddr, unsigned int *paddr, int isReadWrite)
 // AddrSpace::PageFaultHandle
 
 
-
-
 //----------------------------------------------------------------------
 
 void
-AddrSpace::PageFaultHandler(){
+AddrSpace::PageFaultHandler(int badAddr){
         cout<<"AddrSpace::PageFaultHandler()"<<endl;
-
+        
 }
 

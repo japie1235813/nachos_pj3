@@ -25,6 +25,7 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+//#include "machine.h"
 //#include "ksyscall.cpp"
 
 //----------------------------------------------------------------------
@@ -249,10 +250,10 @@ ExceptionHandler(ExceptionType which)
     case PageFaultException:
       cout<<"PageFaultHandler();"<<endl;       
       ++kernel->stats->numPageFaults;
-      kernel->currentThread->space->PageFaultHandler();
-      //kernel->swap->ReadAt(,,);      
-      return;
-      //break;
+      int faultAddr = kernel->machine->ReadRegister(BadVAddrReg);
+      kernel->currentThread->space->PageFaultHandler(faultAddr);      
+      //return;
+      break;
       
     default:
       cerr << "Unexpected user mode exception" << (int)which << "\n";

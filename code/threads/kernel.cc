@@ -115,7 +115,9 @@ Kernel::Initialize()
     
     swapfileSystem = new FileSystem();
     swapMap = new Bitmap(128);
-    swap = kernel->swapfileSystem->Open("SWAP_0");
+    char *tmp="SWAP";
+    swapfileSystem->Create(tmp);
+    swapFile = swapfileSystem->Open("SWAP");
     
 }
 
